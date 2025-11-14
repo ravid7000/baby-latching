@@ -17,6 +17,22 @@ const cloneTimers = (timers) => ({
 
 const buildInitialTimers = () => cloneTimers(INITIAL_STATE.timers);
 
+const startTimerState = (timer, now) => {
+  if (timer.isRunning) return;
+  const elapsed = timer.elapsedMs ?? 0;
+  timer.isRunning = true;
+  timer.startedAt = now - elapsed;
+};
+
+const stopTimerState = (timer, now) => {
+  if (!timer.isRunning) return;
+  if (timer.startedAt) {
+    timer.elapsedMs = now - timer.startedAt;
+  }
+  timer.isRunning = false;
+  timer.startedAt = null;
+};
+
 export const useTimersStore = createAppStore("timers", (set, get) => ({
   timers: buildInitialTimers(),
   toggleTimer: (which) => {
@@ -29,32 +45,26 @@ export const useTimersStore = createAppStore("timers", (set, get) => ({
       const timer = nextTimers[which];
       const isRunning = !timer.isRunning;
       if (isRunning) {
-        timer.isRunning = true;
-        timer.startedAt = timer.startedAt ?? now;
+        startTimerState(timer, now);
       } else {
-        if (timer.startedAt) {
-          timer.elapsedMs = now - timer.startedAt;
-        }
-        timer.isRunning = false;
+        stopTimerState(timer, now);
       }
 
       if (which === "left" && isRunning) {
-        nextTimers.right.isRunning = false;
+        stopTimerState(nextTimers.right, now);
         if (!nextTimers.overall.isRunning) {
-          nextTimers.overall.isRunning = true;
-          nextTimers.overall.startedAt = nextTimers.overall.startedAt ?? now;
+          startTimerState(nextTimers.overall, now);
         }
       }
       if (which === "right" && isRunning) {
-        nextTimers.left.isRunning = false;
+        stopTimerState(nextTimers.left, now);
         if (!nextTimers.overall.isRunning) {
-          nextTimers.overall.isRunning = true;
-          nextTimers.overall.startedAt = nextTimers.overall.startedAt ?? now;
+          startTimerState(nextTimers.overall, now);
         }
       }
       if (which === "overall" && !isRunning) {
-        nextTimers.left.isRunning = false;
-        nextTimers.right.isRunning = false;
+        stopTimerState(nextTimers.left, now);
+        stopTimerState(nextTimers.right, now);
       }
 
       return { timers: nextTimers };

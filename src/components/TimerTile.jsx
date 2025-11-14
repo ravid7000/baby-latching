@@ -23,7 +23,11 @@ export default function TimerTile({ which = "left" }) {
 
   const displayMs = useMemo(() => {
     if (t.isRunning && t.startedAt) {
-      return Math.max(0, nowTick - t.startedAt);
+      const diff = nowTick - t.startedAt;
+      if (diff >= 0) {
+        return diff;
+      }
+      return t.elapsedMs ?? 0;
     }
     return t.elapsedMs;
   }, [t.isRunning, t.startedAt, t.elapsedMs, nowTick]);
