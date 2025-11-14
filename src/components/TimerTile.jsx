@@ -12,7 +12,6 @@ export default function TimerTile({ which = "left" }) {
   const t = useTimersStore((state) => state.timers[which]);
   const toggleTimer = useTimersStore((state) => state.toggleTimer);
   const resetTimer = useTimersStore((state) => state.resetTimer);
-  
   // Use elapsedMs directly from store (updated by ticker)
   const displayMs = t.elapsedMs || 0;
 

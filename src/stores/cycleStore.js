@@ -11,8 +11,6 @@ export const useCycleStore = createAppStore("cycle", (set, get) => ({
   resetFeedCount: () => set({ feedCount: 0 }),
   completeCycle: () => {
     const quantity = useQuantityStore.getState();
-    // const timersStore = useTimersStore.getState();
-    // timersStore.syncRunningTimers();
     const overall = useTimersStore.getState().timers.overall;
     const durationMs = overall.elapsedMs ?? 0;
 
@@ -26,7 +24,6 @@ export const useCycleStore = createAppStore("cycle", (set, get) => ({
 
     logEvent("cycle_complete", snapshot);
     useTimersStore.getState().resetAllTimers();
-    set({ feedCount: 0 });
   },
 }));
 

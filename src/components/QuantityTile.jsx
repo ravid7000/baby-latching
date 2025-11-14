@@ -46,7 +46,7 @@ export default function QuantityTile() {
           <div className="text-xs text-neutral-500 mt-1">
             {isManual
               ? "Manual"
-              : `Auto from ${weightKg}kg × ${factor} ÷ ${frequencyPerDay}/day = ${derivedMl}ml`}
+              : <>Auto from {weightKg}kg &times; {factor} &divide; {frequencyPerDay}/day = {derivedMl}ml</>}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -63,9 +63,9 @@ export default function QuantityTile() {
       {editing && (
         <form
           onSubmit={onSaveCalc}
-          className="mt-3 grid grid-cols-4 gap-2"
+          className="mt-3 flex flex-col gap-3"
         >
-          <label className="text-xs text-neutral-400 col-span-1">
+          <label className="text-xs text-neutral-400">
             Weight (kg)
             <input
               name="weightKg"
@@ -76,7 +76,7 @@ export default function QuantityTile() {
               className="mt-1 w-full rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1 text-neutral-100"
             />
           </label>
-          <label className="text-xs text-neutral-400 col-span-1">
+          <label className="text-xs text-neutral-400">
             Frequency (per day)
             <input
               name="frequencyPerDay"
@@ -86,7 +86,7 @@ export default function QuantityTile() {
               className="mt-1 w-full rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1 text-neutral-100"
             />
           </label>
-          <label className="text-xs text-neutral-400 col-span-1">
+          <label className="text-xs text-neutral-400">
             Factor (ml/kg/day)
             <input
               name="factor"
@@ -97,7 +97,7 @@ export default function QuantityTile() {
               className="mt-1 w-full rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1 text-neutral-100"
             />
           </label>
-          <div className="col-span-1 flex items-end">
+          <div className="md:col-span-1 flex items-end">
             <button
               type="submit"
               className="w-full rounded-md bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 text-sm"
@@ -105,7 +105,7 @@ export default function QuantityTile() {
               Save Calc
             </button>
           </div>
-          <label className="text-xs text-neutral-400 col-span-2">
+          <label className="text-xs text-neutral-400">
             Manual quantity (ml)
             <input
               type="number"

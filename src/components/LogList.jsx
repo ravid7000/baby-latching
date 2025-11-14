@@ -9,18 +9,45 @@ function formatTs(ts) {
 function renderMessage(entry) {
   const { type, data } = entry;
   switch (type) {
-    case 'timer_start':
-      return `Started ${data.which} timer`;
-    case 'timer_stop':
-      return `Stopped ${data.which} timer`;
-    case 'timer_reset':
-      return `Reset ${data.which} timer`;
-    case 'quantity_change':
-      return `Updated quantity settings (ml/feed: ${data.quantity.mlPerFeed})`;
-    case 'cycle_complete': {
+    case "timer_start":
+      return (
+        <p className="flex gap-1 items-start">
+          <span className="inline-flex text-neutral-700">&#9679;</span>
+          Started {data.which} timer
+        </p>
+      );
+    case "timer_stop":
+      return (
+        <p className="flex gap-1 items-start">
+          <span className="inline-flex text-neutral-700">&#9679;</span>
+          Stopped {data.which} timer
+        </p>
+      );
+    case "timer_reset":
+      return (
+        <p className="flex gap-1 items-start">
+          <span className="inline-flex text-neutral-700">&#9679;</span>
+          Reset {data.which} timer
+        </p>
+      );
+    case "quantity_change":
+      return (
+        <p className="flex gap-1 items-start">
+          <span className="inline-flex text-neutral-700">&#9679;</span>
+          Updated quantity settings (ml/feed: {data.quantity.mlPerFeed}
+        </p>
+      );
+    case "cycle_complete": {
       const durationMs = data.durationMs ?? data.data?.durationMs;
-      const formattedDuration = durationMs ? formatMsToHMS(durationMs) : '';
-      return `Completed cycle: ${data.feedCount ?? data.data?.feedCount ?? ''} feeds, ${formattedDuration}, ${data.mlPerFeed ?? data.data?.mlPerFeed ?? ''} ml/feed`;
+      const formattedDuration = formatMsToHMS(durationMs);
+      return (
+        <p className="font-medium flex gap-1">
+          <span className="inline-flex text-emerald-400">&#10003;</span>
+          Completed: {data.feedCount ?? data.data?.feedCount ?? ""} feeds,{" "}
+          {formattedDuration}, {data.mlPerFeed ?? data.data?.mlPerFeed ?? ""}{" "}
+          ml/feed
+        </p>
+      );
     }
     default:
       return type;
@@ -45,15 +72,23 @@ export default function LogList() {
       </div>
       <div className="max-h-72 overflow-y-auto divide-y divide-neutral-800">
         {entries.length === 0 ? (
-          <div className="px-4 py-6 text-sm text-neutral-500">No activity yet.</div>
-        ) : entries.map((entry) => (
-          <div key={entry.id} className="px-4 py-3 text-sm flex items-start justify-between gap-4">
-            <div className="text-neutral-200">{renderMessage(entry)}</div>
-            <div className="text-neutral-500 shrink-0">{formatTs(entry.ts)}</div>
+          <div className="px-4 py-6 text-sm text-neutral-500">
+            No activity yet.
           </div>
-        ))}
+        ) : (
+          entries.map((entry) => (
+            <div
+              key={entry.id}
+              className="px-4 py-3 text-sm flex items-start justify-between gap-4"
+            >
+              <div className="text-neutral-200">{renderMessage(entry)}</div>
+              <div className="text-neutral-500 shrink-0">
+                {formatTs(entry.ts)}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 }
-

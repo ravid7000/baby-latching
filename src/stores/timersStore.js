@@ -54,7 +54,7 @@ const startTicker = (set) => {
 
       return { timers: nextTimers };
     });
-  }, 100); // Update every 100ms for smooth display
+  }, 1000); // Update every 500ms for smooth display
 };
 
 const stopTicker = () => {

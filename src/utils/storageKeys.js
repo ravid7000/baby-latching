@@ -1,7 +1,3 @@
-export const STORAGE_KEYS = {
-  APP: 'baby_latching_app_v1',
-};
-
 export const INITIAL_STATE = {
   timers: {
     left: { isRunning: false, elapsedMs: 0, startedAt: null },

@@ -12,6 +12,7 @@ export default function SummaryTile({ className = "" }) {
   const feedCount = useCycleStore((state) => state.feedCount);
   const incrementFeedCount = useCycleStore((state) => state.incrementFeedCount);
   const completeCycle = useCycleStore((state) => state.completeCycle);
+  const resetFeedCount = useCycleStore((state) => state.resetFeedCount);
 
   return (
     <Tile className={className}>
@@ -33,16 +34,23 @@ export default function SummaryTile({ className = "" }) {
           <button
             type="button"
             onClick={incrementFeedCount}
-            className="rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 text-sm"
+            className="rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-2 text-sm"
           >
             +1 Feed
           </button>
           <button
             type="button"
             onClick={completeCycle}
-            className="rounded-md border border-neutral-800 hover:bg-neutral-800 text-neutral-100 px-3 py-2 text-sm"
+            className="rounded-md border border-neutral-800 hover:bg-neutral-800 text-neutral-100 px-2 py-2 text-sm"
           >
-            Complete Cycle
+            &#10003; Complete Cycle
+          </button>
+          <button
+            type="button"
+            onClick={resetFeedCount}
+            className="rounded-md border border-neutral-800 hover:bg-neutral-800 text-neutral-100 px-2 py-2 text-sm"
+          >
+            Reset Feed
           </button>
         </div>
       </div>
