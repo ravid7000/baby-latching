@@ -1,10 +1,19 @@
+import { useEffect } from "react";
 import TimerTile from "./components/TimerTile.jsx";
 import QuantityTile from "./components/QuantityTile.jsx";
 import SummaryTile from "./components/SummaryTile.jsx";
 import LogList from "./components/LogList.jsx";
+import { useTimersStore } from "./stores/timersStore.js";
 import "./index.css";
 
 function App() {
+  const initTicker = useTimersStore((state) => state.initTicker);
+
+  // Initialize ticker on mount (handles case where timers were running before page reload)
+  useEffect(() => {
+    initTicker();
+  }, [initTicker]);
+
   return (
     <div className="min-h-dvh bg-neutral-950 text-neutral-100">
       <div className="mx-auto max-w-screen-md px-4 sm:px-6 md:px-8 py-6 md:py-10">

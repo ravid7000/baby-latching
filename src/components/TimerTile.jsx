@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import { useTimersStore } from "../stores/timersStore.js";
 import { formatMsToHMS } from "../utils/formatTime.js";
 import Tile from "./Tile.jsx";
@@ -13,24 +12,9 @@ export default function TimerTile({ which = "left" }) {
   const t = useTimersStore((state) => state.timers[which]);
   const toggleTimer = useTimersStore((state) => state.toggleTimer);
   const resetTimer = useTimersStore((state) => state.resetTimer);
-  const [nowTick, setNowTick] = useState(() => Date.now());
-
-  useEffect(() => {
-    if (!t.isRunning) return;
-    const id = setInterval(() => setNowTick(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [t.isRunning, t.startedAt]);
-
-  const displayMs = useMemo(() => {
-    if (t.isRunning && t.startedAt) {
-      const diff = nowTick - t.startedAt;
-      if (diff >= 0) {
-        return diff;
-      }
-      return t.elapsedMs ?? 0;
-    }
-    return t.elapsedMs;
-  }, [t.isRunning, t.startedAt, t.elapsedMs, nowTick]);
+  
+  // Use elapsedMs directly from store (updated by ticker)
+  const displayMs = t.elapsedMs || 0;
 
   const label = LABELS[which];
   const startStop = () => toggleTimer(which);

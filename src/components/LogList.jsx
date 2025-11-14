@@ -1,4 +1,5 @@
 import { useLogsStore } from "../stores/logsStore.js";
+import { formatMsToHMS } from "../utils/formatTime.js";
 
 function formatTs(ts) {
   const d = new Date(ts);
@@ -16,8 +17,11 @@ function renderMessage(entry) {
       return `Reset ${data.which} timer`;
     case 'quantity_change':
       return `Updated quantity settings (ml/feed: ${data.quantity.mlPerFeed})`;
-    case 'cycle_complete':
-      return `Completed cycle: ${data.feedCount ?? data.data?.feedCount ?? ''} feeds, ${data.durationMs ?? data.data?.durationMs ?? ''} ms, ${data.mlPerFeed ?? data.data?.mlPerFeed ?? ''} ml/feed`;
+    case 'cycle_complete': {
+      const durationMs = data.durationMs ?? data.data?.durationMs;
+      const formattedDuration = durationMs ? formatMsToHMS(durationMs) : '';
+      return `Completed cycle: ${data.feedCount ?? data.data?.feedCount ?? ''} feeds, ${formattedDuration}, ${data.mlPerFeed ?? data.data?.mlPerFeed ?? ''} ml/feed`;
+    }
     default:
       return type;
   }

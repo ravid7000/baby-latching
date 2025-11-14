@@ -6,7 +6,6 @@ import { logEvent } from "./logsStore.js";
 const cloneTimerState = (source) => ({
   isRunning: source.isRunning,
   elapsedMs: source.elapsedMs,
-  startedAt: source.startedAt,
 });
 
 const cloneTimers = (timers) => ({
@@ -17,55 +16,117 @@ const cloneTimers = (timers) => ({
 
 const buildInitialTimers = () => cloneTimers(INITIAL_STATE.timers);
 
-const startTimerState = (timer, now) => {
-  if (timer.isRunning) return;
-  const elapsed = timer.elapsedMs ?? 0;
-  timer.isRunning = true;
-  timer.startedAt = now - elapsed;
+// Ticker interval ID (not persisted, managed in memory)
+let tickIntervalId = null;
+let lastTickTime = null;
+
+const startTicker = (set) => {
+  if (tickIntervalId !== null) return;
+  
+  lastTickTime = nowTs();
+  tickIntervalId = setInterval(() => {
+    const now = nowTs();
+    const delta = now - lastTickTime;
+    lastTickTime = now;
+
+    set((state) => {
+      const nextTimers = cloneTimers(state.timers);
+      let hasRunning = false;
+
+      // Update elapsed time for all running timers
+      if (nextTimers.left.isRunning) {
+        nextTimers.left.elapsedMs = (nextTimers.left.elapsedMs || 0) + delta;
+        hasRunning = true;
+      }
+      if (nextTimers.right.isRunning) {
+        nextTimers.right.elapsedMs = (nextTimers.right.elapsedMs || 0) + delta;
+        hasRunning = true;
+      }
+      if (nextTimers.overall.isRunning) {
+        nextTimers.overall.elapsedMs = (nextTimers.overall.elapsedMs || 0) + delta;
+        hasRunning = true;
+      }
+
+      // Stop ticker if no timers are running
+      if (!hasRunning) {
+        stopTicker();
+      }
+
+      return { timers: nextTimers };
+    });
+  }, 100); // Update every 100ms for smooth display
 };
 
-const stopTimerState = (timer, now) => {
-  if (!timer.isRunning) return;
-  if (timer.startedAt) {
-    timer.elapsedMs = now - timer.startedAt;
+const stopTicker = () => {
+  if (tickIntervalId !== null) {
+    clearInterval(tickIntervalId);
+    tickIntervalId = null;
+    lastTickTime = null;
   }
-  timer.isRunning = false;
-  timer.startedAt = null;
+};
+
+const ensureTickerRunning = (set, timers) => {
+  const hasRunning = timers.left.isRunning || timers.right.isRunning || timers.overall.isRunning;
+  if (hasRunning) {
+    startTicker(set);
+  } else {
+    stopTicker();
+  }
 };
 
 export const useTimersStore = createAppStore("timers", (set, get) => ({
   timers: buildInitialTimers(),
+  // Initialize ticker if any timers are running (e.g., after hydration from persistence)
+  initTicker: () => {
+    const state = get();
+    ensureTickerRunning(set, state.timers);
+  },
   toggleTimer: (which) => {
-    const now = nowTs();
     const wasRunning = get().timers[which].isRunning;
 
     set((state) => {
       const nextTimers = cloneTimers(state.timers);
-      console.log({nextTimers})
       const timer = nextTimers[which];
       const isRunning = !timer.isRunning;
-      if (isRunning) {
-        startTimerState(timer, now);
-      } else {
-        stopTimerState(timer, now);
+      
+      // Toggle the timer state
+      timer.isRunning = isRunning;
+      // Ensure elapsedMs is initialized
+      if (timer.elapsedMs === undefined || timer.elapsedMs === null) {
+        timer.elapsedMs = 0;
       }
 
+      // Handle left/right mutual exclusivity and overall sync
       if (which === "left" && isRunning) {
-        stopTimerState(nextTimers.right, now);
+        // Stop right timer
+        nextTimers.right.isRunning = false;
+        nextTimers.right.elapsedMs = nextTimers.right.elapsedMs || 0;
+        // Start overall if not running
         if (!nextTimers.overall.isRunning) {
-          startTimerState(nextTimers.overall, now);
+          nextTimers.overall.isRunning = true;
+          nextTimers.overall.elapsedMs = nextTimers.overall.elapsedMs || 0;
         }
       }
       if (which === "right" && isRunning) {
-        stopTimerState(nextTimers.left, now);
+        // Stop left timer
+        nextTimers.left.isRunning = false;
+        nextTimers.left.elapsedMs = nextTimers.left.elapsedMs || 0;
+        // Start overall if not running
         if (!nextTimers.overall.isRunning) {
-          startTimerState(nextTimers.overall, now);
+          nextTimers.overall.isRunning = true;
+          nextTimers.overall.elapsedMs = nextTimers.overall.elapsedMs || 0;
         }
       }
       if (which === "overall" && !isRunning) {
-        stopTimerState(nextTimers.left, now);
-        stopTimerState(nextTimers.right, now);
+        // Stop left and right timers (pause, don't reset)
+        nextTimers.left.isRunning = false;
+        nextTimers.left.elapsedMs = nextTimers.left.elapsedMs || 0;
+        nextTimers.right.isRunning = false;
+        nextTimers.right.elapsedMs = nextTimers.right.elapsedMs || 0;
       }
+
+      // Ensure ticker is running if any timer is active
+      ensureTickerRunning(set, nextTimers);
 
       return { timers: nextTimers };
     });
@@ -78,14 +139,21 @@ export const useTimersStore = createAppStore("timers", (set, get) => ({
       nextTimers[which] = cloneTimerState(INITIAL_STATE.timers[which]);
       if (which === "overall") {
         nextTimers.left.isRunning = false;
+        nextTimers.left.elapsedMs = nextTimers.left.elapsedMs || 0;
         nextTimers.right.isRunning = false;
+        nextTimers.right.elapsedMs = nextTimers.right.elapsedMs || 0;
       }
+      
+      // Ensure ticker state matches timer states
+      ensureTickerRunning(set, nextTimers);
+      
       return { timers: nextTimers };
     });
     logEvent("timer_reset", { which });
   },
   resetAllTimers: () => {
     set({ timers: buildInitialTimers() });
+    stopTicker();
   },
 }));
 
