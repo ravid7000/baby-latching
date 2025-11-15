@@ -33,9 +33,9 @@ function App() {
 
           <button 
             onClick={() => setIsHelpModalOpen(true)}
-            className="text-xs rounded-md border border-neutral-800 px-2 py-1 hover:bg-neutral-800"
+            className="text-xs rounded-md border border-neutral-800 px-2 py-2 hover:bg-neutral-800"
           >
-            <IoSettingsOutline />
+            <IoSettingsOutline className="w-4 h-4" />
           </button>
         </header>
 
@@ -50,7 +50,7 @@ function App() {
             <SummaryTile className="sm:col-span-2" />
           </div>
 
-          <section className="mt-6 md:mt-8">
+          <section className="mt-4 md:mt-6">
             <LogList />
           </section>
         </main>
