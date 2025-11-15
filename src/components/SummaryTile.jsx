@@ -34,14 +34,14 @@ export default function SummaryTile({ className = "" }) {
           <button
             type="button"
             onClick={incrementFeedCount}
-            className="rounded-md bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-2 text-sm"
+            className="rounded-md border border-neutral-800 hover:bg-neutral-800 text-white px-2 py-2 text-sm"
           >
             +1 Feed
           </button>
           <button
             type="button"
             onClick={completeCycle}
-            className="rounded-md border border-neutral-800 hover:bg-neutral-800 text-neutral-100 px-2 py-2 text-sm"
+            className="rounded-md  bg-indigo-600 hover:bg-indigo-500 text-neutral-100 px-2 py-2 text-sm"
           >
             &#10003; Complete Cycle
           </button>

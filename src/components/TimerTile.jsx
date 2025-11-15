@@ -29,14 +29,14 @@ export default function TimerTile({ which = "left" }) {
       ariaPressed={t.isRunning}
       title={`${label} - ${t.isRunning ? "Stop" : "Start"}`}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <div className="text-sm text-neutral-400">{label}</div>
-          <div className="mt-1 text-3xl font-semibold tabular-nums">
-            {formatMsToHMS(displayMs)}
+      <div className="flex flex-col justify-between gap-2">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <div className="text-sm text-neutral-400">{label}</div>
+            <div className="mt-1 text-3xl font-semibold tabular-nums">
+              {formatMsToHMS(displayMs)}
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
           <span
             className={`inline-flex h-2.5 w-2.5 rounded-full ${
               t.isRunning
@@ -44,6 +44,18 @@ export default function TimerTile({ which = "left" }) {
                 : "bg-neutral-700"
             }`}
           />
+        </div>
+        {which === "overall" ? (
+          <div className="text-xs text-neutral-500">
+            Tap to start/stop overall without affecting side timers. Stopping
+            overall pauses both sides.
+          </div>
+        ) : (
+          <div className="text-xs text-neutral-500">
+            Tap to start/stop {label} timer.
+          </div>
+        )}
+        <div className="mt-2">
           <button
             type="button"
             onClick={reset}
@@ -53,12 +65,6 @@ export default function TimerTile({ which = "left" }) {
           </button>
         </div>
       </div>
-      {which === "overall" && (
-        <div className="mt-2 text-xs text-neutral-500">
-          Tap to start/stop overall without affecting side timers. Stopping
-          overall pauses both sides.
-        </div>
-      )}
     </Tile>
   );
 }

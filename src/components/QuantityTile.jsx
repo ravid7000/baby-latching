@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import Tile from "./Tile.jsx";
 import { useQuantityStore } from "../stores/quantityStore.js";
 
-export default function QuantityTile() {
+export default function QuantityTile({ className = "" }) {
   const weightKg = useQuantityStore((state) => state.weightKg);
   const frequencyPerDay = useQuantityStore((state) => state.frequencyPerDay);
   const factor = useQuantityStore((state) => state.factor);
@@ -36,18 +36,23 @@ export default function QuantityTile() {
   };
 
   return (
-    <Tile>
+    <Tile className={className}>
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="text-sm text-neutral-400">Milk Quantity (ml/feed)</div>
+          <div className="text-sm text-neutral-400">Milk Quantity</div>
           <div className="mt-1 text-3xl font-semibold tabular-nums">
-            {mlPerFeed} ml
+            {mlPerFeed} ml/feed
           </div>
-          <div className="text-xs text-neutral-500 mt-1">
+          <div className="text-xs text-neutral-400 mt-1">
             {isManual
               ? "Manual"
               : <>Auto from {weightKg}kg &times; {factor} &divide; {frequencyPerDay}/day = {derivedMl}ml</>}
           </div>
+          <div className="text-xs text-neutral-500 mt-1">
+            This is the quantity of milk that should be given to the baby per feed. It is an estimation based on the baby's weight and the frequency of feeds.{' '}
+            <a href="https://www.parents.com/baby/feeding/baby-feeding-chart-how-much-and-when-to-feed-infants-the-first-year/" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>Read more</a>
+          </div>
+          
         </div>
         <div className="flex items-center gap-2">
           <button
