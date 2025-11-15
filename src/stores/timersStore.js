@@ -2,6 +2,7 @@ import { nowTs } from "../utils/formatTime.js";
 import { INITIAL_STATE } from "../utils/storageKeys.js";
 import { createAppStore } from "./basePersist.js";
 import { logEvent } from "./logsStore.js";
+import { useSettingsStore } from "./settingsStore.js";
 
 const cloneTimerState = (source) => ({
   isRunning: source.isRunning,
@@ -20,10 +21,69 @@ const buildInitialTimers = () => cloneTimers(INITIAL_STATE.timers);
 let tickIntervalId = null;
 let lastTickTime = null;
 
+// Wake lock instance (not persisted, managed in memory)
+let wakeLock = null;
+let getTimersState = null; // Will be set after store is created
+
+const requestWakeLock = async () => {
+  // Check if wake lock is enabled in settings
+  const settings = useSettingsStore.getState();
+  if (!settings.keepScreenOn) {
+    return;
+  }
+
+  // Check if API is available
+  if (!navigator.wakeLock) {
+    return;
+  }
+
+  // If already have a wake lock, don't request again
+  if (wakeLock) {
+    return;
+  }
+
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+    
+    // Set up listener to re-request if wake lock is released while timers are running
+    wakeLock.addEventListener('release', () => {
+      wakeLock = null;
+      // Re-request if timers are still running
+      if (getTimersState) {
+        const timersState = getTimersState();
+        const hasRunning = timersState.timers.left.isRunning || 
+                          timersState.timers.right.isRunning || 
+                          timersState.timers.overall.isRunning;
+        if (hasRunning) {
+          requestWakeLock();
+        }
+      }
+    });
+  } catch (err) {
+    // Handle errors gracefully (e.g., permission denied, not supported)
+    console.warn('Failed to request wake lock:', err);
+    wakeLock = null;
+  }
+};
+
+const releaseWakeLock = async () => {
+  if (wakeLock) {
+    try {
+      await wakeLock.release();
+      wakeLock = null;
+    } catch (err) {
+      console.warn('Failed to release wake lock:', err);
+      wakeLock = null;
+    }
+  }
+};
+
 const startTicker = (set) => {
   if (tickIntervalId !== null) return;
   
   lastTickTime = nowTs();
+  requestWakeLock();
+  
   tickIntervalId = setInterval(() => {
     const now = nowTs();
     const delta = now - lastTickTime;
@@ -63,6 +123,7 @@ const stopTicker = () => {
     tickIntervalId = null;
     lastTickTime = null;
   }
+  releaseWakeLock();
 };
 
 const ensureTickerRunning = (set, timers) => {
@@ -74,13 +135,24 @@ const ensureTickerRunning = (set, timers) => {
   }
 };
 
-export const useTimersStore = createAppStore("timers", (set, get) => ({
-  timers: buildInitialTimers(),
-  // Initialize ticker if any timers are running (e.g., after hydration from persistence)
-  initTicker: () => {
-    const state = get();
-    ensureTickerRunning(set, state.timers);
-  },
+export const useTimersStore = createAppStore("timers", (set, get) => {
+  // Set up reference to get state for wake lock re-request
+  getTimersState = get;
+  
+  return {
+    timers: buildInitialTimers(),
+    // Initialize ticker if any timers are running (e.g., after hydration from persistence)
+    initTicker: () => {
+      const state = get();
+      ensureTickerRunning(set, state.timers);
+      // Restore wake lock if timers were running
+      const hasRunning = state.timers.left.isRunning || 
+                        state.timers.right.isRunning || 
+                        state.timers.overall.isRunning;
+      if (hasRunning) {
+        requestWakeLock();
+      }
+    },
   toggleTimer: (which) => {
     const wasRunning = get().timers[which].isRunning;
 
@@ -167,5 +239,6 @@ export const useTimersStore = createAppStore("timers", (set, get) => ({
     set({ timers: buildInitialTimers() });
     stopTicker();
   },
-}));
+  };
+});
 

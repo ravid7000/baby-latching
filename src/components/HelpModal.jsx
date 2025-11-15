@@ -1,10 +1,16 @@
 import { useEffect } from "react";
 import { IoCloseOutline, IoHeart } from "react-icons/io5";
 import { useQuantityStore } from "../stores/quantityStore.js";
+import { useSettingsStore } from "../stores/settingsStore.js";
 
 function HelpModal({ isOpen, onClose }) {
   const unit = useQuantityStore((state) => state.unit);
   const setUnit = useQuantityStore((state) => state.setUnit);
+  const keepScreenOn = useSettingsStore((state) => state.keepScreenOn);
+  const setKeepScreenOn = useSettingsStore((state) => state.setKeepScreenOn);
+  
+  // Check if Screen Wake Lock API is supported
+  const isWakeLockSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 
   useEffect(() => {
     if (isOpen) {
@@ -70,6 +76,27 @@ function HelpModal({ isOpen, onClose }) {
                 Ounces (oz)
               </button>
             </div>
+          </div>
+
+          <div className="rounded-md border border-neutral-800 px-4 py-3">
+            <div className="font-medium mb-2">Keep Screen On</div>
+            <div className="text-sm text-neutral-400 mb-3">
+              {isWakeLockSupported 
+                ? "Prevent the screen from sleeping while timers are running"
+                : "Screen Wake Lock API is not supported in your browser"}
+            </div>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={keepScreenOn}
+                onChange={(e) => setKeepScreenOn(e.target.checked)}
+                disabled={!isWakeLockSupported}
+                className="w-5 h-5 rounded border-neutral-700 bg-neutral-900 text-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <span className={`text-sm ${!isWakeLockSupported ? 'text-neutral-500' : 'text-neutral-100'}`}>
+                {keepScreenOn ? "Enabled" : "Disabled"}
+              </span>
+            </label>
           </div>
 
           <a

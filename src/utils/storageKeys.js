@@ -14,5 +14,8 @@ export const INITIAL_STATE = {
   },
   cycle: { feedCount: 0 },
   logs: [],
+  settings: {
+    keepScreenOn: true,
+  },
 };
 
