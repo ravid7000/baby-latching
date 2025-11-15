@@ -41,7 +41,7 @@ export default function SummaryTile({ className = "" }) {
           <button
             type="button"
             onClick={completeCycle}
-            className="rounded-md  bg-indigo-600 hover:bg-indigo-500 text-neutral-100 px-2 py-2 text-sm"
+            className="rounded-md bg-emerald-600 hover:bg-emerald-600 text-neutral-100 px-2 py-2 text-sm"
           >
             &#10003; Complete Cycle
           </button>
