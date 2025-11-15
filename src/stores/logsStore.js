@@ -8,6 +8,7 @@ const cloneInitialLogs = () => [...INITIAL_STATE.logs];
 
 export const useLogsStore = createAppStore("logs", (set) => ({
   entries: cloneInitialLogs(),
+  filter: "all",
   addEntry: (type, data) =>
     set((state) => {
       const entry = {
@@ -21,6 +22,7 @@ export const useLogsStore = createAppStore("logs", (set) => ({
       };
     }),
   clear: () => set({ entries: [] }),
+  setFilter: (filter) => set({ filter }),
 }));
 
 export function logEvent(type, data) {

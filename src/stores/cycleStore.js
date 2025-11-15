@@ -11,15 +11,19 @@ export const useCycleStore = createAppStore("cycle", (set, get) => ({
   resetFeedCount: () => set({ feedCount: 0 }),
   completeCycle: () => {
     const quantity = useQuantityStore.getState();
-    const overall = useTimersStore.getState().timers.overall;
-    const durationMs = overall.elapsedMs ?? 0;
+    const timers = useTimersStore.getState().timers;
+    const leftDurationMs = timers.left.elapsedMs ?? 0;
+    const rightDurationMs = timers.right.elapsedMs ?? 0;
+    const overallDurationMs = timers.overall.elapsedMs ?? 0;
 
     const snapshot = {
       mlPerFeed: quantity.mlPerFeed,
       weightKg: quantity.weightKg,
       frequencyPerDay: quantity.frequencyPerDay,
       feedCount: get().feedCount,
-      durationMs,
+      durationMs: overallDurationMs,
+      leftDurationMs,
+      rightDurationMs,
     };
 
     logEvent("cycle_complete", snapshot);
