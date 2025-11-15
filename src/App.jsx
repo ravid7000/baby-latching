@@ -1,14 +1,17 @@
-import { useEffect } from "react";
-import { IoSettingsOutline } from "react-icons/io5";
+import { useEffect, useState } from "react";
+import { IoHelpOutline } from "react-icons/io5";
+
 import TimerTile from "./components/TimerTile.jsx";
 import QuantityTile from "./components/QuantityTile.jsx";
 import SummaryTile from "./components/SummaryTile.jsx";
 import LogList from "./components/LogList.jsx";
+import HelpModal from "./components/HelpModal.jsx";
 import { useTimersStore } from "./stores/timersStore.js";
 import "./index.css";
 
 function App() {
   const initTicker = useTimersStore((state) => state.initTicker);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   // Initialize ticker on mount (handles case where timers were running before page reload)
   useEffect(() => {
@@ -28,8 +31,11 @@ function App() {
             </p>
           </div>
 
-          <button className="text-xs rounded-md border border-neutral-800 px-2 py-1 hover:bg-neutral-800">
-            <IoSettingsOutline />
+          <button 
+            onClick={() => setIsHelpModalOpen(true)}
+            className="text-xs rounded-md border border-neutral-800 px-2 py-1 hover:bg-neutral-800"
+          >
+            <IoHelpOutline />
           </button>
         </header>
 
@@ -49,6 +55,11 @@ function App() {
           </section>
         </main>
       </div>
+
+      <HelpModal 
+        isOpen={isHelpModalOpen} 
+        onClose={() => setIsHelpModalOpen(false)} 
+      />
     </div>
   );
 }
