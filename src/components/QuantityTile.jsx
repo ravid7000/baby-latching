@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import Tile from "./Tile.jsx";
 import { useQuantityStore } from "../stores/quantityStore.js";
-import { mlToOz, ozToMl, formatQuantity } from "../utils/unitConversion.js";
+import { mlToOz, ozToMl } from "../utils/unitConversion.js";
 
 export default function QuantityTile({ className = "" }) {
   const weightKg = useQuantityStore((state) => state.weightKg);
@@ -63,7 +63,7 @@ export default function QuantityTile({ className = "" }) {
           </div>
           <div className="text-xs text-neutral-500 mt-1">
             This is the quantity of milk that should be given to the baby per feed. It is an estimation based on the baby's weight and the frequency of feeds.{' '}
-            <a href="https://www.parents.com/baby/feeding/baby-feeding-chart-how-much-and-when-to-feed-infants-the-first-year/" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>Read more</a>
+            <a className="text-emerald-600 hover:text-emerald-500" href="https://www.parents.com/baby/feeding/baby-feeding-chart-how-much-and-when-to-feed-infants-the-first-year/" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>Read more</a>
           </div>
           
         </div>
@@ -127,20 +127,30 @@ export default function QuantityTile({ className = "" }) {
             Manual quantity ({unit})
             <input
               type="number"
-              min="0"
+              min=""
               step={unit === 'oz' ? '0.1' : '1'}
               value={displayQuantity}
               onChange={onManualChange}
               className="mt-1 w-full rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1 text-neutral-100"
             />
           </label>
-          <div className="col-span-1 flex items-end">
+          <div className="text-xs text-neutral-400">
+            Manual quantity is saved on change.
+          </div>
+          <div className="col-span-1 flex items-end gap-4">
             <button
               type="button"
               onClick={() => setQuantity({ isManual: false })}
               className="w-full rounded-md border border-neutral-800 hover:bg-neutral-800 text-neutral-100 px-3 py-2 text-sm"
             >
               Use Auto
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing((v) => !v)}
+              className="w-full rounded-md border border-neutral-800 hover:bg-neutral-800 text-neutral-100 px-3 py-2 text-sm"
+            >
+              Close
             </button>
           </div>
         </form>

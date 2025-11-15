@@ -38,7 +38,7 @@ function renderMessage(entry, unit) {
       return (
         <p className="flex gap-1 items-start">
           <span className="inline-flex text-neutral-700">&#9679;</span>
-          Updated quantity settings ({unit}/feed: {displayValue}
+          Updated quantity settings ({unit}/feed: {displayValue})
         </p>
       );
     }

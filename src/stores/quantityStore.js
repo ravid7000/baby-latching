@@ -39,7 +39,6 @@ export const useQuantityStore = createAppStore("quantity", (set) => ({
       };
       return nextState;
     });
-    logEvent("quantity_change", { quantity: nextState });
   },
   setFactor: (factor) => {
     const safeFactor = Number.isFinite(factor) ? factor : INITIAL_STATE.quantity.factor;
