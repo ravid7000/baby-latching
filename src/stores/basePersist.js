@@ -9,14 +9,6 @@ export function createAppStore(name, initializer, options = {}) {
       name,
       // storage,
       version,
-      // Add onRehydrateStorage to debug hydration
-      onRehydrateStorage: () => (state, error) => {
-        if (error) {
-          console.error(`[Storage] Rehydration error for ${name}:`, error);
-        } else {
-          console.log(`[Storage] Rehydrated ${name}:`, state ? Object.keys(state) : 'no state');
-        }
-      },
       ...rest,
     })
   );

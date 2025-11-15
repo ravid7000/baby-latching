@@ -1,4 +1,4 @@
-const CACHE_NAME = 'baby-latching-v1';
+const CACHE_NAME = 'baby-latching-v1763183865589';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -12,8 +12,8 @@ self.addEventListener('install', (event) => {
       .then((cache) => {
         return cache.addAll(urlsToCache);
       })
-      .catch((err) => {
-        console.error('Service Worker: Cache install failed', err);
+      .catch(() => {
+        // Cache install failed
       })
   );
   // Force the waiting service worker to become the active service worker
