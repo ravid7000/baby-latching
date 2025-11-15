@@ -125,6 +125,12 @@ export const useTimersStore = createAppStore("timers", (set, get) => ({
         nextTimers.right.elapsedMs = nextTimers.right.elapsedMs || 0;
       }
 
+      // Stop overall timer if both left and right timers are stopped
+      if ((which === "left" || which === "right") && !nextTimers.left.isRunning && !nextTimers.right.isRunning) {
+        nextTimers.overall.isRunning = false;
+        nextTimers.overall.elapsedMs = nextTimers.overall.elapsedMs || 0;
+      }
+
       // Ensure ticker is running if any timer is active
       ensureTickerRunning(set, nextTimers);
 
@@ -142,6 +148,12 @@ export const useTimersStore = createAppStore("timers", (set, get) => ({
         nextTimers.left.elapsedMs = nextTimers.left.elapsedMs || 0;
         nextTimers.right.isRunning = false;
         nextTimers.right.elapsedMs = nextTimers.right.elapsedMs || 0;
+      }
+
+      // Stop overall timer if both left and right timers are stopped
+      if ((which === "left" || which === "right") && !nextTimers.left.isRunning && !nextTimers.right.isRunning) {
+        nextTimers.overall.isRunning = false;
+        nextTimers.overall.elapsedMs = nextTimers.overall.elapsedMs || 0;
       }
       
       // Ensure ticker state matches timer states
