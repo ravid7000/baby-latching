@@ -1,12 +1,14 @@
 import { useLogsStore } from "../stores/logsStore.js";
+import { useQuantityStore } from "../stores/quantityStore.js";
 import { formatMsToHMS } from "../utils/formatTime.js";
+import { mlToOz } from "../utils/unitConversion.js";
 
 function formatTs(ts) {
   const d = new Date(ts);
   return d.toLocaleString();
 }
 
-function renderMessage(entry) {
+function renderMessage(entry, unit) {
   const { type, data } = entry;
   switch (type) {
     case "timer_start":
@@ -30,22 +32,26 @@ function renderMessage(entry) {
           Reset {data.which} timer
         </p>
       );
-    case "quantity_change":
+    case "quantity_change": {
+      const mlValue = data.quantity.mlPerFeed;
+      const displayValue = unit === 'oz' ? mlToOz(mlValue) : mlValue;
       return (
         <p className="flex gap-1 items-start">
           <span className="inline-flex text-neutral-700">&#9679;</span>
-          Updated quantity settings (ml/feed: {data.quantity.mlPerFeed}
+          Updated quantity settings ({unit}/feed: {displayValue}
         </p>
       );
+    }
     case "cycle_complete": {
       const durationMs = data.durationMs ?? data.data?.durationMs;
       const formattedDuration = formatMsToHMS(durationMs);
+      const mlValue = data.mlPerFeed ?? data.data?.mlPerFeed ?? 0;
+      const displayValue = unit === 'oz' ? mlToOz(mlValue) : mlValue;
       return (
         <p className="font-medium flex gap-1">
           <span className="inline-flex text-emerald-400">&#10003;</span>
           Completed: {data.feedCount ?? data.data?.feedCount ?? ""} feeds,{" "}
-          {formattedDuration}, {data.mlPerFeed ?? data.data?.mlPerFeed ?? ""}{" "}
-          ml/feed
+          {formattedDuration}, {displayValue} {unit}/feed
         </p>
       );
     }
@@ -57,6 +63,7 @@ function renderMessage(entry) {
 export default function LogList() {
   const entries = useLogsStore((state) => state.entries);
   const clearLogs = useLogsStore((state) => state.clear);
+  const unit = useQuantityStore((state) => state.unit);
 
   return (
     <div className="rounded-xl border border-neutral-800">
@@ -81,7 +88,7 @@ export default function LogList() {
               key={entry.id}
               className="px-4 py-3 text-sm flex items-start justify-between gap-4"
             >
-              <div className="text-neutral-200">{renderMessage(entry)}</div>
+              <div className="text-neutral-200">{renderMessage(entry, unit)}</div>
               <div className="text-neutral-500 shrink-0">
                 {formatTs(entry.ts)}
               </div>

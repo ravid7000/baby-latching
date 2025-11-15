@@ -9,6 +9,10 @@ const calculateAutoMl = (weightKg, factor, frequencyPerDay) =>
 
 export const useQuantityStore = createAppStore("quantity", (set) => ({
 ...buildInitialQuantity(),
+  setUnit: (unit) => {
+    if (unit !== 'ml' && unit !== 'oz') return;
+    set((state) => ({ ...state, unit }));
+  },
   setQuantity: (updates = {}) => {
     let nextState;
     set((state) => {

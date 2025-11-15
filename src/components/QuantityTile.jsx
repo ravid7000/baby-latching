@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import Tile from "./Tile.jsx";
 import { useQuantityStore } from "../stores/quantityStore.js";
+import { mlToOz, ozToMl, formatQuantity } from "../utils/unitConversion.js";
 
 export default function QuantityTile({ className = "" }) {
   const weightKg = useQuantityStore((state) => state.weightKg);
@@ -8,6 +9,7 @@ export default function QuantityTile({ className = "" }) {
   const factor = useQuantityStore((state) => state.factor);
   const isManual = useQuantityStore((state) => state.isManual);
   const mlPerFeed = useQuantityStore((state) => state.mlPerFeed);
+  const unit = useQuantityStore((state) => state.unit);
 
   const setQuantity = useQuantityStore((state) => state.setQuantity);
   const setManualQuantity = useQuantityStore((state) => state.setManualQuantity);
@@ -17,6 +19,15 @@ export default function QuantityTile({ className = "" }) {
     () => Math.round((weightKg * factor) / Math.max(1, frequencyPerDay)),
     [weightKg, frequencyPerDay, factor]
   );
+
+  // Convert values for display based on selected unit
+  const displayQuantity = useMemo(() => {
+    return unit === 'oz' ? mlToOz(mlPerFeed) : mlPerFeed;
+  }, [mlPerFeed, unit]);
+
+  const displayDerived = useMemo(() => {
+    return unit === 'oz' ? mlToOz(derivedMl) : derivedMl;
+  }, [derivedMl, unit]);
 
   const onSaveCalc = (e) => {
     e.preventDefault();
@@ -29,9 +40,11 @@ export default function QuantityTile({ className = "" }) {
   };
 
   const onManualChange = (e) => {
-    const v = parseInt(e.target.value || "0", 10);
+    const v = parseFloat(e.target.value || "0");
     if (!Number.isNaN(v)) {
-      setManualQuantity(v);
+      // Convert to ML before storing (values are always stored in ML internally)
+      const mlValue = unit === 'oz' ? ozToMl(v) : Math.round(v);
+      setManualQuantity(mlValue);
     }
   };
 
@@ -41,12 +54,12 @@ export default function QuantityTile({ className = "" }) {
         <div>
           <div className="text-sm text-neutral-400">Milk Quantity</div>
           <div className="mt-1 text-3xl font-semibold tabular-nums">
-            {mlPerFeed} ml/feed
+            {displayQuantity} {unit}/feed
           </div>
           <div className="text-xs text-neutral-400 mt-1">
             {isManual
               ? "Manual"
-              : <>Auto from {weightKg}kg &times; {factor} &divide; {frequencyPerDay}/day = {derivedMl}ml</>}
+              : <>Auto from {weightKg}kg &times; {factor} &divide; {frequencyPerDay}/day = {displayDerived}{unit}</>}
           </div>
           <div className="text-xs text-neutral-500 mt-1">
             This is the quantity of milk that should be given to the baby per feed. It is an estimation based on the baby's weight and the frequency of feeds.{' '}
@@ -111,11 +124,12 @@ export default function QuantityTile({ className = "" }) {
             </button>
           </div>
           <label className="text-xs text-neutral-400">
-            Manual quantity (ml)
+            Manual quantity ({unit})
             <input
               type="number"
               min="0"
-              value={mlPerFeed}
+              step={unit === 'oz' ? '0.1' : '1'}
+              value={displayQuantity}
               onChange={onManualChange}
               className="mt-1 w-full rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1 text-neutral-100"
             />

@@ -1,18 +1,25 @@
+import { useMemo } from "react";
 import Tile from "./Tile.jsx";
 import { formatMsToHMS } from "../utils/formatTime.js";
 import { useTimersStore } from "../stores/timersStore.js";
 import { useQuantityStore } from "../stores/quantityStore.js";
 import { useCycleStore } from "../stores/cycleStore.js";
+import { mlToOz } from "../utils/unitConversion.js";
 
 export default function SummaryTile({ className = "" }) {
   const overallTimer = useTimersStore((state) => state.timers.overall);
 
   const mlPerFeed = useQuantityStore((state) => state.mlPerFeed);
+  const unit = useQuantityStore((state) => state.unit);
   const weightKg = useQuantityStore((state) => state.weightKg);
   const feedCount = useCycleStore((state) => state.feedCount);
   const incrementFeedCount = useCycleStore((state) => state.incrementFeedCount);
   const completeCycle = useCycleStore((state) => state.completeCycle);
   const resetFeedCount = useCycleStore((state) => state.resetFeedCount);
+
+  const displayQuantity = useMemo(() => {
+    return unit === 'oz' ? mlToOz(mlPerFeed) : mlPerFeed;
+  }, [mlPerFeed, unit]);
 
   return (
     <Tile className={className}>
@@ -21,7 +28,7 @@ export default function SummaryTile({ className = "" }) {
           <div className="text-sm text-neutral-400">Cycle Summary</div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-2 text-sm">
             <div className="text-neutral-400">Quantity</div>
-            <div className="tabular-nums">{mlPerFeed} ml</div>
+            <div className="tabular-nums">{displayQuantity} {unit}</div>
             <div className="text-neutral-400">Duration</div>
             <div className="tabular-nums">{formatMsToHMS(overallTimer.elapsedMs)}</div>
             <div className="text-neutral-400">Baby weight</div>

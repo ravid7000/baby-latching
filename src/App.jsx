@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IoHelpOutline } from "react-icons/io5";
+import { IoSettingsOutline } from "react-icons/io5";
 
 import TimerTile from "./components/TimerTile.jsx";
 import QuantityTile from "./components/QuantityTile.jsx";
@@ -35,7 +35,7 @@ function App() {
             onClick={() => setIsHelpModalOpen(true)}
             className="text-xs rounded-md border border-neutral-800 px-2 py-1 hover:bg-neutral-800"
           >
-            <IoHelpOutline />
+            <IoSettingsOutline />
           </button>
         </header>
 

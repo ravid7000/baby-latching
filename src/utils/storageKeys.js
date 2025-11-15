@@ -10,6 +10,7 @@ export const INITIAL_STATE = {
     mlPerFeed: 65,
     isManual: false,
     factor: 150,
+    unit: 'ml',
   },
   cycle: { feedCount: 0 },
   logs: [],
