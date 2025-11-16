@@ -1,66 +1,16 @@
+import { useEffect, useState } from "react";
 import { IoCheckmarkSharp, IoPlaySharp, IoPause, IoReloadSharp, IoPencilSharp } from "react-icons/io5";
 
 import { useLogsStore } from "../stores/logsStore.js";
 import { useQuantityStore } from "../stores/quantityStore.js";
 import { mlToOz } from "../utils/unitConversion.js";
-
-function formatTime(ts) {
-  const d = new Date(ts);
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
-}
-
-function formatDate(ts) {
-  const d = new Date(ts);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
-}
-
-function getRelativeTime(ts) {
-  const now = Date.now();
-  const diffMs = now - ts;
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffMinutes < 1) {
-    return "just now";
-  } else if (diffMinutes < 60) {
-    return `${diffMinutes} min ago`;
-  } else if (diffHours < 24) {
-    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-  } else {
-    return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-  }
-}
-
-function formatMsToHM(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-    2,
-    "0"
-  )}`;
-}
-
-function getOrdinalSuffix(num) {
-  const j = num % 10;
-  const k = num % 100;
-  if (j === 1 && k !== 11) {
-    return "st";
-  }
-  if (j === 2 && k !== 12) {
-    return "nd";
-  }
-  if (j === 3 && k !== 13) {
-    return "rd";
-  }
-  return "th";
-}
+import {
+  formatTime,
+  formatDate,
+  getRelativeTime,
+  formatMsToHM,
+  getOrdinalSuffix,
+} from "../utils/formatTime.js";
 
 function renderMessage(entry, unit) {
   const { type, data, ts } = entry;
@@ -161,6 +111,7 @@ export default function LogList() {
   const entries = useLogsStore((state) => state.entries);
   const filter = useLogsStore((state) => state.filter ?? "all");
   const unit = useQuantityStore((state) => state.unit);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const setFilter = (filterValue) => {
     useLogsStore.getState().setFilter(filterValue);
@@ -168,6 +119,17 @@ export default function LogList() {
   const clearLogs = () => {
     useLogsStore.getState().clear();
   };
+
+  useEffect(() => {
+    const handleFocus = () => {
+      setRefreshKey((prev) => prev + 1);
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
 
   const filteredEntries =
     filter === "completed"
@@ -217,7 +179,7 @@ export default function LogList() {
           </div>
         ) : (
           filteredEntries.map((entry) => (
-            <div key={entry.id} className="px-4 py-3 text-sm">
+            <div key={`${entry.id}-${refreshKey}`} className="px-4 py-3 text-sm">
               <div className="text-neutral-200">
                 {renderMessage(entry, unit)}
               </div>
